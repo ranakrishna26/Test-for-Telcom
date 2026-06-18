@@ -8,6 +8,8 @@ import {
 } from '../lib/health'
 import type { DomainId, Incident, TimeWindow } from '../types'
 import { DomainDetailPanel } from './DomainDetailPanel'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
 
 const SPARK = 32
 
@@ -50,47 +52,52 @@ export function DomainRail({
   const overview = selectedDomain === null
 
   return (
-    <div className="domain-rail" aria-label="Domain modules">
+    <div
+      className={cn('domain-rail', overview && 'domain-rail--overview')}
+      aria-label="Domain modules"
+    >
       {overview ? (
         <section
-          className="domain-rail__global"
+          className="panel domain-rail__global"
           aria-label="Top incidents across all domains"
         >
-          <h3 className="domain-rail__global-title">Top incidents</h3>
-          <p className="domain-rail__global-sub">
-            Highest impact this window.
-          </p>
+          <div className="panel__head domain-rail__global-head">
+            <h2 className="panel__title domain-rail__global-title">Top incidents</h2>
+          </div>
           {globalTop.length === 0 ? (
             <p className="domain-rail__global-empty">None active.</p>
           ) : (
-            <ul
-              className="domain-rail__global-list"
+            <ScrollArea
+              className="domain-rail__global-scroll"
               onMouseLeave={() => onHoverIncident(null)}
             >
-              {globalTop.map((inc) => {
-                const isActive = highlightIncidentId === inc.id
-                return (
-                  <li key={inc.id}>
-                    <button
-                      type="button"
-                      className={`domain-rail__global-item${isActive ? ' domain-rail__global-item--focused' : ''}`}
-                      onClick={() => onTopIncidentClick(inc.id)}
-                      onMouseEnter={() => onHoverIncident(inc.id)}
-                    >
-                      <span
-                        className={`domain-panel__sev ${severityClass[inc.severity]}`}
+              <ul className="domain-rail__global-list">
+                {globalTop.map((inc) => {
+                  const isActive = highlightIncidentId === inc.id
+                  return (
+                    <li key={inc.id}>
+                      <button
+                        type="button"
+                        className={`domain-rail__global-item${isActive ? ' domain-rail__global-item--focused' : ''}`}
+                        onClick={() => onTopIncidentClick(inc.id)}
+                        onMouseEnter={() => onHoverIncident(inc.id)}
                       >
-                        {inc.severity}
-                      </span>
-                      <span className="domain-rail__global-name">{inc.name}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+                        <span
+                          className={`domain-panel__sev ${severityClass[inc.severity]}`}
+                        >
+                          {inc.severity}
+                        </span>
+                        <span className="domain-rail__global-name">{inc.name}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </ScrollArea>
           )}
         </section>
       ) : null}
+      <div className="domain-rail__domains">
       {DOMAINS.map((domain) => {
         const nowHealth = computeDomainHealth(incidents, domain.id, {
           start: window.end,
@@ -121,6 +128,7 @@ export function DomainRail({
           />
         )
       })}
+      </div>
     </div>
   )
 }

@@ -13,16 +13,22 @@ import { DomainRail } from './domain-panels/DomainRail'
 import { getActiveIncidents } from './lib/health'
 import { getPreviousWindow, getWindowForPreset } from './lib/timeRange'
 import type { DomainId, TimeRangePreset } from './types'
+import { TimeRangeSelector } from './components/TimeRangeSelector'
+import { TrendCharts } from './components/TrendCharts'
+import { DomainSankey } from './components/DomainSankey'
+import { JiraIncidentPanel } from './components/JiraIncidentPanel'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
+import './App.css'
+
 const RegionHeatmapMap = lazy(() =>
   import('./components/RegionHeatmapMap').then((m) => ({
     default: m.RegionHeatmapMap,
   })),
 )
-import { TimeRangeSelector } from './components/TimeRangeSelector'
-import { TrendCharts } from './components/TrendCharts'
-import { DomainSankey } from './components/DomainSankey'
-import { JiraIncidentPanel } from './components/JiraIncidentPanel'
-import './App.css'
 
 export default function App() {
   const incidents = useMemo(() => getMockIncidents(), [])
@@ -31,9 +37,7 @@ export default function App() {
   const [focusedIncidentId, setFocusedIncidentId] = useState<string | null>(
     null,
   )
-  /** Hover preview on incident lists (top incidents / drivers); overrides click focus while active. */
   const [hoverIncidentId, setHoverIncidentId] = useState<string | null>(null)
-  /** Jira side panel (Top incidents list or Sankey incident node). */
   const [jiraPanelIncidentId, setJiraPanelIncidentId] = useState<string | null>(
     null,
   )
@@ -61,7 +65,6 @@ export default function App() {
     setHoverIncidentId(null)
   }
 
-  /** Sets focused incident and clears hover preview so “story” mode (dimming) applies. */
   const commitIncidentFocus = useCallback(
     (next: SetStateAction<string | null>) => {
       setFocusedIncidentId(next)
@@ -76,7 +79,6 @@ export default function App() {
     ? incidents.find((i) => i.id === jiraPanelIncidentId)
     : undefined
 
-  /** Open Jira panel + focus; click same incident again closes panel and clears focus. */
   const activateJiraForIncident = useCallback(
     (incidentId: string) => {
       if (jiraPanelIncidentId === incidentId) {
@@ -114,36 +116,33 @@ export default function App() {
   }, [jiraPanelIncidentId, closeJiraPanel])
 
   return (
-    <div className="dashboard">
-      <header
-        className="dashboard__header"
-        aria-label="Telecom health — domain and incident overview"
-      >
-        <div className="dashboard__header-inner">
-          <div className="dashboard__title-row">
-            <span className="dashboard__kicker">Operations</span>
-            <h1 className="dashboard__title">Telecom health</h1>
+    <div className="dashboard flex min-h-screen flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="mx-auto flex w-full max-w-[1920px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+              Operations
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight">Telecom health</h1>
           </div>
-          <div className="dashboard__toolbar" aria-label="Dashboard controls">
-            <div
-              className="dashboard__stat"
-              role="status"
-              title="Incidents active in the selected time window"
-            >
-              <span className="dashboard__stat-label">Active incidents</span>
-              <span className="dashboard__stat-value">{activeIncidentCount}</span>
-            </div>
-            <div className="dashboard__toolbar-divider" aria-hidden />
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant="outline" className="gap-2 px-3 py-1.5 text-sm font-normal">
+              <span className="text-muted-foreground">Active incidents</span>
+              <span className="font-semibold tabular-nums">{activeIncidentCount}</span>
+            </Badge>
+            <Separator orientation="vertical" className="hidden h-8 sm:block" />
             <TimeRangeSelector value={range} onChange={setRange} />
           </div>
         </div>
       </header>
 
-      <div className="dashboard__body">
-        <aside
-          className="dashboard__rail"
-          aria-label="Domain modules"
-        >
+      <div
+        className={cn(
+          'dashboard__body mx-auto grid w-full max-w-[1920px] flex-1 gap-4 p-4 lg:grid-cols-[minmax(280px,320px)_1fr_minmax(340px,420px)] lg:p-6',
+          selectedDomain === null && 'dashboard__body--overview',
+        )}
+      >
+        <aside aria-label="Domain modules" className="dashboard__rail min-h-0">
           <DomainRail
             incidents={incidents}
             window={timeWindow}
@@ -157,7 +156,7 @@ export default function App() {
           />
         </aside>
 
-        <main className="dashboard__center" aria-label="Trends and correlation">
+        <main className="dashboard__center flex min-h-0 min-w-0 flex-col gap-4" aria-label="Trends and correlation">
           <TrendCharts
             incidents={incidents}
             domainId={selectedDomain}
@@ -179,15 +178,12 @@ export default function App() {
           />
         </main>
 
-        <aside
-          className="dashboard__map-col"
-          aria-label="Regional map"
-        >
+        <aside className="dashboard__map-col min-h-[360px]" aria-label="Regional map">
           <Suspense
             fallback={
-              <div className="panel region-map region-map--loading">
-                <p className="region-map__loading">Loading map…</p>
-              </div>
+              <Card className="flex h-full min-h-[360px] items-center justify-center">
+                <p className="text-sm text-muted-foreground">Loading map…</p>
+              </Card>
             }
           >
             <RegionHeatmapMap
@@ -203,28 +199,22 @@ export default function App() {
         </aside>
       </div>
 
-      {jiraPanelIncidentId && jiraPanelIncident ? (
-        <>
-          <div
-            className="jira-backdrop"
-            role="presentation"
-            aria-hidden
-            onClick={closeJiraPanel}
-          />
-          <aside
-            className="jira-panel"
-            aria-label="Jira integration"
-            aria-modal="true"
-            role="dialog"
-          >
+      <Sheet
+        open={Boolean(jiraPanelIncidentId && jiraPanelIncident)}
+        onOpenChange={(open) => {
+          if (!open) closeJiraPanel()
+        }}
+      >
+        <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-lg">
+          {jiraPanelIncident ? (
             <JiraIncidentPanel
               incident={jiraPanelIncident}
               range={range}
               onClose={closeJiraPanel}
             />
-          </aside>
-        </>
-      ) : null}
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

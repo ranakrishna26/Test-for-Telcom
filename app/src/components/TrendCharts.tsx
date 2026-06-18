@@ -172,15 +172,38 @@ export function TrendCharts({
       </div>
 
       <div className="trend-charts__chart trend-charts__chart--single">
-        <h3 className="trend-charts__label">
-          {isOverview ? 'Domain health' : `${domainLabel} health & incidents`}
-        </h3>
+        <div className="trend-charts__chart-head">
+          <h3 className="trend-charts__label">
+            {isOverview ? 'Domain health' : `${domainLabel} health & incidents`}
+          </h3>
+          {isOverview ? (
+            <div
+              className="trend-charts__legend-custom"
+              aria-label="Chart legend"
+            >
+              {(['ran', 'core', 'security', 'transport'] as const).map((id) => (
+                <span key={id} className="trend-charts__legend-item">
+                  <span
+                    className="trend-charts__legend-swatch"
+                    style={{ background: DOMAIN_LINE[id].stroke }}
+                  />
+                  {DOMAIN_LINE[id].name}
+                </span>
+              ))}
+              <span className="trend-charts__legend-item trend-charts__legend-item--muted">
+                <span className="trend-charts__legend-dot-swatch" aria-hidden>
+                  ●
+                </span>
+                Incident start
+              </span>
+            </div>
+          ) : null}
+        </div>
         <div className="trend-charts__frame">
           {isOverview ? (
-            <>
-              <div className="trend-charts__plot">
-                <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
+            <div className="trend-charts__plot">
+              <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
                   data={overviewData}
                   syncId="telcom-trends"
                   margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
@@ -308,30 +331,7 @@ export function TrendCharts({
                 />
               </ComposedChart>
                 </ResponsiveContainer>
-              </div>
-              <div
-                className="trend-charts__legend-custom"
-                aria-label="Chart legend"
-              >
-                {(['ran', 'core', 'security', 'transport'] as const).map(
-                  (id) => (
-                    <span key={id} className="trend-charts__legend-item">
-                      <span
-                        className="trend-charts__legend-swatch"
-                        style={{ background: DOMAIN_LINE[id].stroke }}
-                      />
-                      {DOMAIN_LINE[id].name}
-                    </span>
-                  ),
-                )}
-                <span className="trend-charts__legend-item trend-charts__legend-item--muted">
-                  <span className="trend-charts__legend-dot-swatch" aria-hidden>
-                    ●
-                  </span>
-                  Incident start
-                </span>
-              </div>
-            </>
+            </div>
           ) : (
             <div className="trend-charts__plot">
               <ResponsiveContainer width="100%" height="100%">

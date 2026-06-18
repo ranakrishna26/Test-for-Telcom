@@ -1,11 +1,16 @@
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  // echarts-for-react prebundle emits `import "tslib"`; without this, dev fails to resolve tslib from .vite/deps.
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   optimizeDeps: {
-    include: ['echarts-for-react', 'echarts', 'tslib'],
+    include: ['echarts-for-react', 'echarts', 'tslib', 'mapbox-gl'],
   },
 })
