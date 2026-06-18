@@ -2,6 +2,7 @@
   "name": "telcom-dashboard",
   "private": true,
   "scripts": {
+    "postinstall": "npm install --prefix app",
     "dev": "npm run dev --prefix app",
     "build": "npm run build --prefix app",
     "lint": "npm run lint --prefix app",
