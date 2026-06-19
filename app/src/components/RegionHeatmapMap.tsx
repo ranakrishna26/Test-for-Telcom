@@ -53,7 +53,7 @@ const heatmapPaint = {
     1,
     'rgba(248, 113, 113, 0.9)',
   ],
-  'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 20, 9, 48],
+    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 24, 5, 36, 8, 48],
   'heatmap-opacity': 0.75,
 } as const
 
@@ -169,6 +169,8 @@ export function RegionHeatmapMap({
     const map = mapRef.current
     if (!map || features.length === 0) return
 
+    map.resize()
+
     if (flyToIncidentId) {
       const f = features.find((x) => x.id === flyToIncidentId)
       if (!f?.points.length) return
@@ -181,7 +183,7 @@ export function RegionHeatmapMap({
 
     const bounds = boundsFromFeatures(features)
     if (bounds) {
-      map.fitBounds(bounds, { padding: 44, maxZoom: 6, duration: 550 })
+      map.fitBounds(bounds, { padding: 44, maxZoom: 5, duration: 550 })
     }
   }, [features, window.start, window.end, flyToIncidentId])
 
@@ -195,10 +197,10 @@ export function RegionHeatmapMap({
     : null
 
   return (
-    <Card className="flex h-full min-h-[360px] flex-col border-border/80 shadow-sm">
-      <CardHeader className="pb-2">
+    <Card className="flex h-full min-h-0 flex-col border-border/80 shadow-sm">
+      <CardHeader className="shrink-0 pb-2">
         <CardTitle className="text-base">Regional map</CardTitle>
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <div className="flex flex-col items-start gap-2.5">
           <CardDescription className="text-xs">
             Heat shows impact; markers show severity.
           </CardDescription>
@@ -215,8 +217,8 @@ export function RegionHeatmapMap({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="min-h-[320px] flex-1 p-3 pt-0">
-        <div className="h-full min-h-[320px] overflow-hidden rounded-lg border border-border">
+      <CardContent className="flex min-h-0 flex-1 flex-col p-3 pt-0">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
           <Map
             ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
@@ -224,7 +226,7 @@ export function RegionHeatmapMap({
               ...CENTER,
               zoom: DEFAULT_ZOOM,
             }}
-            style={{ width: '100%', height: '100%', minHeight: 320 }}
+            style={{ width: '100%', height: '100%' }}
             mapStyle={MAP_STYLE}
             scrollZoom
             attributionControl={false}

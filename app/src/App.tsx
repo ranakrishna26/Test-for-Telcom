@@ -21,7 +21,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
 import './App.css'
 
 const RegionHeatmapMap = lazy(() =>
@@ -116,8 +115,8 @@ export default function App() {
   }, [jiraPanelIncidentId, closeJiraPanel])
 
   return (
-    <div className="dashboard flex min-h-screen flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+    <div className="dashboard min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex w-full max-w-[1920px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
@@ -136,13 +135,8 @@ export default function App() {
         </div>
       </header>
 
-      <div
-        className={cn(
-          'dashboard__body mx-auto grid w-full max-w-[1920px] flex-1 gap-4 p-4 lg:grid-cols-[minmax(280px,320px)_1fr_minmax(340px,420px)] lg:p-6',
-          selectedDomain === null && 'dashboard__body--overview',
-        )}
-      >
-        <aside aria-label="Domain modules" className="dashboard__rail min-h-0">
+      <div className="dashboard__body">
+        <aside aria-label="Domain modules" className="dashboard__rail">
           <DomainRail
             incidents={incidents}
             window={timeWindow}
@@ -156,7 +150,7 @@ export default function App() {
           />
         </aside>
 
-        <main className="dashboard__center flex min-h-0 min-w-0 flex-col gap-4" aria-label="Trends and correlation">
+        <main className="dashboard__center" aria-label="Trends and correlation">
           <TrendCharts
             incidents={incidents}
             domainId={selectedDomain}
@@ -178,7 +172,7 @@ export default function App() {
           />
         </main>
 
-        <aside className="dashboard__map-col min-h-[360px]" aria-label="Regional map">
+        <aside className="dashboard__map-col" aria-label="Regional map">
           <Suspense
             fallback={
               <Card className="flex h-full min-h-[360px] items-center justify-center">

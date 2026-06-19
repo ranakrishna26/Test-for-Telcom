@@ -9,7 +9,6 @@ import {
 import type { DomainId, Incident, TimeWindow } from '../types'
 import { DomainDetailPanel } from './DomainDetailPanel'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/utils'
 
 const SPARK = 32
 
@@ -52,10 +51,7 @@ export function DomainRail({
   const overview = selectedDomain === null
 
   return (
-    <div
-      className={cn('domain-rail', overview && 'domain-rail--overview')}
-      aria-label="Domain modules"
-    >
+    <div className="domain-rail" aria-label="Domain modules">
       {overview ? (
         <section
           className="panel domain-rail__global"

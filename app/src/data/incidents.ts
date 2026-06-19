@@ -6,6 +6,7 @@ const D = 24 * H
 /**
  * Mock incidents relative to `referenceNow` so the dashboard always has
  * realistic overlap with 24h / 7d / 30d windows.
+ * Affected regions are spread nationally for map demo coverage.
  */
 export function getMockIncidents(referenceNow: number = Date.now()): Incident[] {
   return [
@@ -19,7 +20,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 4 * H,
       domainImpact: { ran: 0.92, transport: 0.28 },
       impactSummary: 'Handover failures elevated; backhaul saturation suspected.',
-      affectedRegions: ['Metro North', 'Ring corridor'],
+      affectedRegions: ['Metro North', 'Perth metro'],
     },
     {
       id: 'inc-core-dns',
@@ -31,7 +32,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 2 * H,
       domainImpact: { core: 0.95, security: 0.35, ran: 0.15 },
       impactSummary: 'Recursive resolver pool at capacity.',
-      affectedRegions: ['National'],
+      affectedRegions: ['National', 'Brisbane core', 'Adelaide ring'],
     },
     {
       id: 'inc-sec-ddos',
@@ -43,7 +44,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 8 * H,
       domainImpact: { security: 0.88, core: 0.22 },
       impactSummary: 'Mitigation active; attack volume declining.',
-      affectedRegions: ['Finance edge'],
+      affectedRegions: ['Finance edge', 'Melbourne metro'],
     },
     {
       id: 'inc-trans-fiber',
@@ -55,7 +56,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 12 * H,
       domainImpact: { transport: 0.9, ran: 0.45, core: 0.2 },
       impactSummary: 'Protected path failed; traffic rerouted.',
-      affectedRegions: ['East ring', 'Coastal PoPs'],
+      affectedRegions: ['East ring', 'Gold Coast', 'Cairns north'],
     },
     {
       id: 'inc-ran-minor',
@@ -67,7 +68,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow - 1 * H,
       domainImpact: { ran: 0.55 },
       impactSummary: 'Event ended; interference cleared.',
-      affectedRegions: ['Stadium cluster'],
+      affectedRegions: ['Stadium cluster', 'Hobart PoP'],
     },
     {
       id: 'inc-core-upgrade',
@@ -79,7 +80,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow - 2 * D,
       domainImpact: { core: 0.75 },
       impactSummary: 'Rollback completed outside peak window.',
-      affectedRegions: ['Core site B'],
+      affectedRegions: ['Core site B', 'Canberra hub'],
     },
     {
       id: 'inc-sec-cert',
@@ -91,7 +92,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 3 * D,
       domainImpact: { security: 0.62, core: 0.18 },
       impactSummary: 'Renewal in progress; monitoring auth errors.',
-      affectedRegions: ['API edge'],
+      affectedRegions: ['API edge', 'Darwin edge'],
     },
     {
       id: 'inc-trans-backhaul',
@@ -103,7 +104,7 @@ export function getMockIncidents(referenceNow: number = Date.now()): Incident[] 
       activeTo: referenceNow + 6 * H,
       domainImpact: { transport: 0.55, ran: 0.4 },
       impactSummary: 'Evening peak traffic; QoS adjustments applied.',
-      affectedRegions: ['Suburban west'],
+      affectedRegions: ['Suburban west', 'Adelaide ring', 'Ring corridor'],
     },
   ]
 }

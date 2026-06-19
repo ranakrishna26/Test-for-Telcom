@@ -208,8 +208,37 @@ export function buildIncidentMapFeatures(
 
 const SEV_INTENSITY = { critical: 1.12, major: 1, minor: 0.9 } as const
 
+function addHeatCell(
+  cell: Map<string, number>,
+  lat: number,
+  lng: number,
+  amount: number,
+): void {
+  const k = `${lat.toFixed(4)},${lng.toFixed(4)}`
+  cell.set(k, (cell.get(k) ?? 0) + amount)
+}
+
+/** Sample heat along great-circle-ish segments so multi-region incidents read on the map. */
+function addSegmentHeat(
+  cell: Map<string, number>,
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+  amount: number,
+  steps = 4,
+): void {
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps
+    addHeatCell(
+      cell,
+      a.lat + (b.lat - a.lat) * t,
+      a.lng + (b.lng - a.lng) * t,
+      amount * (i === 0 || i === steps ? 1 : 0.55),
+    )
+  }
+}
+
 /**
- * Unified intensity per map cell for leaflet.heat: higher = more impact at that pin.
+ * Unified intensity per map cell for heatmap layers: higher = more impact at that pin.
  * Values are normalized to 0–1 by the caller’s max (see RegionHeatmapMap).
  */
 export function buildImpactHeatPoints(
@@ -231,8 +260,14 @@ export function buildImpactHeatPoints(
     const w = SEV_INTENSITY[f.incident.severity]
     const contribution = f.impact * w * dim * focusDim
     for (const p of f.points) {
-      const k = `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`
-      cell.set(k, (cell.get(k) ?? 0) + contribution)
+      addHeatCell(cell, p.lat, p.lng, contribution)
+    }
+    if (f.points.length >= 2) {
+      for (let i = 0; i < f.points.length; i++) {
+        for (let j = i + 1; j < f.points.length; j++) {
+          addSegmentHeat(cell, f.points[i]!, f.points[j]!, contribution * 0.45)
+        }
+      }
     }
   }
   let maxV = 0.001
