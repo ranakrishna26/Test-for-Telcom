@@ -187,6 +187,12 @@ export function RegionHeatmapMap({
     }
   }, [features, window.start, window.end, flyToIncidentId])
 
+  useEffect(() => {
+    const onResize = () => mapRef.current?.resize()
+    globalThis.window.addEventListener('resize', onResize)
+    return () => globalThis.window.removeEventListener('resize', onResize)
+  }, [])
+
   const handleMarkerClick = (id: string) => {
     onFocusIncident((prev) => (prev === id ? null : id))
     setPopupFeatureId(id)

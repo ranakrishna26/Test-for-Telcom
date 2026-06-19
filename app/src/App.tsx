@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type SetStateAction,
 } from 'react'
@@ -23,6 +24,9 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
 import './App.css'
 
+const CANVAS_WIDTH = 1280
+const CANVAS_HEIGHT = 960
+
 const RegionHeatmapMap = lazy(() =>
   import('./components/RegionHeatmapMap').then((m) => ({
     default: m.RegionHeatmapMap,
@@ -30,6 +34,7 @@ const RegionHeatmapMap = lazy(() =>
 )
 
 export default function App() {
+  const scaleRootRef = useRef<HTMLDivElement>(null)
   const incidents = useMemo(() => getMockIncidents(), [])
   const [range, setRange] = useState<TimeRangePreset>('24h')
   const [selectedDomain, setSelectedDomain] = useState<DomainId | null>(null)
@@ -114,10 +119,33 @@ export default function App() {
     return () => globalThis.window.removeEventListener('keydown', onKey)
   }, [jiraPanelIncidentId, closeJiraPanel])
 
+  useEffect(() => {
+    const el = scaleRootRef.current
+    if (!el) return
+
+    const applyScale = () => {
+      const { clientWidth, clientHeight } = el
+      const scaleW = clientWidth / CANVAS_WIDTH
+      const scaleH = clientHeight > 0 ? clientHeight / CANVAS_HEIGHT : 1
+      const scale = Math.min(1, scaleW, scaleH)
+      el.style.setProperty('--embed-scale', String(scale))
+      el.style.minHeight = `${CANVAS_HEIGHT * scale}px`
+      globalThis.window.dispatchEvent(new Event('resize'))
+    }
+
+    applyScale()
+    const observer = new ResizeObserver(applyScale)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="dashboard min-h-screen bg-background text-foreground">
+    <>
+      <div ref={scaleRootRef} className="dashboard-scale-root">
+        <div className="dashboard-scale-inner">
+          <div className="dashboard bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
-        <div className="mx-auto flex w-full max-w-[1920px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
+        <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
               Operations
@@ -192,6 +220,9 @@ export default function App() {
           </Suspense>
         </aside>
       </div>
+          </div>
+        </div>
+      </div>
 
       <Sheet
         open={Boolean(jiraPanelIncidentId && jiraPanelIncident)}
@@ -209,6 +240,6 @@ export default function App() {
           ) : null}
         </SheetContent>
       </Sheet>
-    </div>
+    </>
   )
 }
