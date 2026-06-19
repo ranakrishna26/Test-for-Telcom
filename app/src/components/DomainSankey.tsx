@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { EChartsOption } from 'echarts'
 import ReactECharts from 'echarts-for-react'
 import { DOMAIN_IDS, DOMAINS } from '../data/domains'
@@ -39,10 +39,6 @@ function formatSeverity(s: Severity): string {
 
 const SANKEY_HEIGHT = 400
 
-const SANKEY_MIN_FLOW_INNER_WIDTH = 280
-
-const SANKEY_MIN_CHART_WIDTH = 12 + 12 + SANKEY_MIN_FLOW_INNER_WIDTH
-
 function severityHex(sev: Severity): string {
   switch (sev) {
     case 'critical':
@@ -52,24 +48,6 @@ function severityHex(sev: Severity): string {
     default:
       return '#94a3b8'
   }
-}
-
-function useContainerWidth() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState(0)
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const measure = () => {
-      const w = el.getBoundingClientRect().width
-      setWidth((prev) => (Math.abs(prev - w) > 0.5 ? w : prev))
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  return { ref, width }
 }
 
 type Hover =
@@ -199,8 +177,6 @@ export function DomainSankey({
   const [hover, setHover] = useState<Hover>(null)
   const [sankeyTip, setSankeyTip] = useState<SankeyTip | null>(null)
   const [detailIncidentId, setDetailIncidentId] = useState<string | null>(null)
-  const { ref: wrapRef, width: wrapWidth } = useContainerWidth()
-  const chartWidth = Math.max(wrapWidth, SANKEY_MIN_CHART_WIDTH)
 
   const graphRef = useRef(graph)
   graphRef.current = graph
@@ -317,8 +293,6 @@ export function DomainSankey({
           right: 8,
           top: 8,
           bottom: 8,
-          width: Math.max(chartWidth - 16, 200),
-          height: SANKEY_HEIGHT - 16,
           orient: 'horizontal',
           nodeWidth: 16,
           nodeGap: 14,
@@ -347,7 +321,6 @@ export function DomainSankey({
     highlightIncidentId,
     topImpactIncidentId,
     adjacency,
-    chartWidth,
   ])
 
   const onEvents = useMemo(
@@ -474,7 +447,6 @@ export function DomainSankey({
         </p>
       </div>
       <div
-        ref={wrapRef}
         className="domain-sankey__wrap domain-sankey__wrap--echarts"
         onMouseLeave={() => {
           setHover(null)
@@ -483,7 +455,7 @@ export function DomainSankey({
       >
         <ReactECharts
           option={option}
-          style={{ width: chartWidth, height: SANKEY_HEIGHT }}
+          style={{ width: '100%', height: SANKEY_HEIGHT }}
           opts={{ renderer: 'canvas' }}
           notMerge
           lazyUpdate={false}
