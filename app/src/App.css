@@ -4,6 +4,9 @@
   max-width: 100%;
   overflow: hidden;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   --embed-scale: 1;
 }
 
@@ -11,19 +14,17 @@
   width: var(--dashboard-canvas-width);
   transform: scale(var(--embed-scale));
   transform-origin: top center;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 :root {
   --dashboard-canvas-width: 1280px;
-  --dashboard-canvas-min-height: 960px;
 }
 
 .dashboard {
   width: var(--dashboard-canvas-width);
   min-width: var(--dashboard-canvas-width);
   max-width: var(--dashboard-canvas-width);
-  min-height: var(--dashboard-canvas-min-height);
   margin: 0 auto;
   overflow: visible;
   text-align: left;

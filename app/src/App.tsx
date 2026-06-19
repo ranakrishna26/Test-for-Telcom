@@ -25,7 +25,6 @@ import { Separator } from '@/components/ui/separator'
 import './App.css'
 
 const CANVAS_WIDTH = 1280
-const CANVAS_HEIGHT = 960
 
 const RegionHeatmapMap = lazy(() =>
   import('./components/RegionHeatmapMap').then((m) => ({
@@ -35,6 +34,8 @@ const RegionHeatmapMap = lazy(() =>
 
 export default function App() {
   const scaleRootRef = useRef<HTMLDivElement>(null)
+  const scaleInnerRef = useRef<HTMLDivElement>(null)
+  const dashboardRef = useRef<HTMLDivElement>(null)
   const incidents = useMemo(() => getMockIncidents(), [])
   const [range, setRange] = useState<TimeRangePreset>('24h')
   const [selectedDomain, setSelectedDomain] = useState<DomainId | null>(null)
@@ -120,30 +121,38 @@ export default function App() {
   }, [jiraPanelIncidentId, closeJiraPanel])
 
   useEffect(() => {
-    const el = scaleRootRef.current
-    if (!el) return
+    const root = scaleRootRef.current
+    const inner = scaleInnerRef.current
+    const dashboard = dashboardRef.current
+    if (!root || !inner || !dashboard) return
 
     const applyScale = () => {
-      const { clientWidth, clientHeight } = el
-      const scaleW = clientWidth / CANVAS_WIDTH
-      const scaleH = clientHeight > 0 ? clientHeight / CANVAS_HEIGHT : 1
-      const scale = Math.min(1, scaleW, scaleH)
-      el.style.setProperty('--embed-scale', String(scale))
-      el.style.minHeight = `${CANVAS_HEIGHT * scale}px`
+      const contentW = CANVAS_WIDTH
+      const contentH = Math.ceil(dashboard.getBoundingClientRect().height)
+      if (contentH <= 0) return
+
+      const availableW = root.clientWidth
+      const availableH = root.clientHeight > 0 ? root.clientHeight : contentH
+
+      const scale = Math.min(1, availableW / contentW, availableH / contentH)
+      inner.style.width = `${contentW}px`
+      inner.style.height = `${contentH}px`
+      root.style.setProperty('--embed-scale', String(scale))
       globalThis.window.dispatchEvent(new Event('resize'))
     }
 
     applyScale()
     const observer = new ResizeObserver(applyScale)
-    observer.observe(el)
+    observer.observe(root)
+    observer.observe(dashboard)
     return () => observer.disconnect()
-  }, [])
+  }, [incidents, range, selectedDomain])
 
   return (
     <>
       <div ref={scaleRootRef} className="dashboard-scale-root">
-        <div className="dashboard-scale-inner">
-          <div className="dashboard bg-background text-foreground">
+        <div ref={scaleInnerRef} className="dashboard-scale-inner">
+          <div ref={dashboardRef} className="dashboard bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
           <div>
