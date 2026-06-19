@@ -1,16 +1,19 @@
 .dashboard {
   width: 100%;
+  min-width: 1200px;
   min-height: 100vh;
+  overflow-x: auto;
   text-align: left;
   box-sizing: border-box;
 }
 
 .dashboard__body {
   display: grid;
-  /* left rail | center (widest) | right map */
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(300px, 380px);
+  /* left rail | center (widest) | right map — fixed for embeds (Framer iframe) */
+  grid-template-columns: 280px minmax(480px, 1fr) 360px;
   gap: 1rem;
   align-items: stretch;
+  min-width: 1200px;
   max-width: 1920px;
   margin: 0 auto;
   padding: 1rem 1.25rem 1.5rem;
@@ -43,16 +46,6 @@
 
 .dashboard__center > .panel:first-child {
   margin-top: 0;
-}
-
-@media (max-width: 1100px) {
-  .dashboard__body {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard__map-col {
-    min-height: 420px;
-  }
 }
 
 .dashboard__header {
